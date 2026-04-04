@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时光胶囊 · 交大130周年</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .card{background:white;padding:40px;border-radius:20px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        h1{text-align:center;color:#333;margin-bottom:8px;font-size:24px}
+        .subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:30px}
+        input,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin-bottom:15px;font-size:15px;transition:border-color 0.3s}
+        input:focus,textarea:focus{outline:none;border-color:#667eea}
+        .record-btn{width:100%;height:100px;border:3px dashed #ccc;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:15px;transition:all 0.3s}
+        .record-btn:hover{border-color:#667eea;background:#f0f4ff}
+        .record-btn.recording{border-color:#ff4757;background:#ffe0e0;animation:pulse 1.5s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+        .timer{font-size:24px;font-weight:bold;color:#ff4757;margin-top:5px}
+        button{width:100%;padding:14px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s}
+        button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(102,126,234,0.4)}
+        button:disabled{opacity:0.5;cursor:not-allowed}
+        .status{margin-top:15px;padding:12px;border-radius:8px;text-align:center;display:none;font-size:14px}
+        .status.show{display:block}
+        .success{background:#d4edda;color:#155724}
+        .error{background:#f8d7da;color:#721c24}
+        .info{background:#d1ecf1;color:#0c5460}
+        audio{width:100%;margin-bottom:15px;display:none}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎓 时光胶囊</h1>
+        <p class="subtitle">录制30秒语音，130天后送达邮箱</p>
+        
+        <input type="email" id="email" placeholder="your@email.com" required>
+        
+        <div class="record-btn" id="recordBtn" onclick="toggleRecord()">
+            <div id="recordIcon">🎙️</div>
+            <div id="recordText">点击开始录音</div>
+            <div class="timer" id="timer" style="display:none">00:00</div>
+        </div>
+        
+        <audio id="preview" controls></audio>
+        
+        <textarea id="message" rows="3" placeholder="文字附言（可选）"></textarea>
+        
+        <button id="submitBtn" onclick="submit()" disabled>封存胶囊</button>
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        const API = location.origin.includes('localhost') ? '' : ''
+        
+        let recorder, chunks = [], blob, voiceUrl, recording = false, timer, seconds = 0
+
+        async function toggleRecord() {
+            if (!recorder) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({audio:true})
+                    recorder = new MediaRecorder(stream)
+                    recorder.ondataavailable = e => chunks.push(e.data)
+                    recorder.onstop = async () => {
+                        blob = new Blob(chunks, {type:'audio/webm'})
+                        document.getElementById('preview').src = URL.createObjectURL(blob)
+                        document.getElementById('preview').style.display = 'block'
+                        showStatus('正在上传...', 'info')
+                        await uploadAudio()
+                    }
+                } catch(err) {
+                    alert('请允许麦克风权限')
+                    return
+                }
+            }
+            
+            if (!recording) {
+                chunks = []
+                recorder.start()
+                recording = true
+                seconds = 0
+                document.getElementById('recordBtn').classList.add('recording')
+                document.getElementById('recordIcon').textContent = '⏹️'
+                document.getElementById('recordText').textContent = '点击停止'
+                document.getElementById('timer').style.display = 'block'
+                
+                timer = setInterval(() => {
+                    seconds++
+                    const m = String(Math.floor(seconds/60)).padStart(2,'0')
+                    const s = String(seconds%60).padStart(2,'0')
+                    document.getElementById('timer').textContent = `${m}:${s}`
+                    if (seconds >= 30) toggleRecord()
+                }, 1000)
+            } else {
+                clearInterval(timer)
+                recorder.stop()
+                recording = false
+                document.getElementById('recordBtn').classList.remove('recording')
+                document.getElementById('recordIcon').textContent = '🎙️'
+                document.getElementById('recordText').textContent = '重新录制'
+                document.getElementById('timer').style.display = 'none'
+            }
+        }
+
+        async function uploadAudio() {
+            try {
+                const {url, params} = await fetch('/api/upload-url').then(r => r.json())
+                
+                const form = new FormData()
+                Object.entries(params).forEach(([k,v]) => form.append(k,v))
+                form.append('file', blob)
+                
+                const res = await fetch(url, {method:'POST', body:form})
+                const data = await res.json()
+                
+                if (data.secure_url) {
+                    voiceUrl = data.secure_url
+                    document.getElementById('submitBtn').disabled = false
+                    showStatus('✅ 上传成功，可以封存了', 'success')
+                } else {
+                    throw new Error('上传失败')
+                }
+            } catch(e) {
+                showStatus('上传失败：' + e.message, 'error')
+            }
+        }
+
+        async function submit() {
+            const email = document.getElementById('email').value.trim()
+            if (!email || !email.includes('@')) {
+                showStatus('请输入正确的邮箱', 'error')
+                return
+            }
+            
+            document.getElementById('submitBtn').disabled = true
+            document.getElementById('submitBtn').textContent = '封存中...'
+            
+            try {
+                const res = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        email,
+                        voice_url: voiceUrl,
+                        message: document.getElementById('message').value
+                    })
+                })
+                
+                const data = await res.json()
+                if (data.success) {
+                    showStatus(`🎉 封存成功！<br>将在 <b>${data.send_date}</b> 发送到你的邮箱`, 'success')
+                    setTimeout(() => location.reload(), 4000)
+                } else {
+                    throw new Error(data.error || '提交失败')
+                }
+            } catch(e) {
+                showStatus('失败：' + e.message, 'error')
+                document.getElementById('submitBtn').disabled = false
+                document.getElementById('submitBtn').textContent = '封存胶囊'
+            }
+        }
+
+        function showStatus(msg, type) {
+            const s = document.getElementById('status')
+            s.innerHTML = msg
+            s.className = 'status show ' + type
+        }
+    </script>
+</body>
+</html>
