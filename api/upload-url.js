@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   const signature = cloudinary.utils.api_sign_request({
     timestamp,
     folder,
-    resource_type: 'video'
+    resource_type: 'auto'
   }, process.env.CLOUDINARY_SECRET)
 
   res.json({
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       signature,
       api_key: process.env.CLOUDINARY_KEY,
       folder,
-      resource_type: 'video'
+      resource_type: 'auto'
     }
   })
 }
