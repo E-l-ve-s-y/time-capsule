@@ -1,12 +1,19 @@
-// api/upload-url.js
 export default async function handler(req, res) {
-  const folder = `capsules/${new Date().toISOString().slice(0,7)}`
+  // 调试：打印环境变量
+  console.log('ENV CHECK:', {
+    name: process.env.CLOUDINARY_NAME,
+    key: process.env.CLOUDINARY_KEY,
+    secret: process.env.CLOUDINARY_SECRET ? '存在' : '缺失'
+  })
+  
+  const url = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/auto/upload`
+  
+  console.log('返回的 URL:', url)
   
   res.json({
-    url: `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/auto/upload`,  // 删除空格
+    url: url,
     params: {
-      upload_preset: 'time_capsule',
-      folder
+      upload_preset: 'time_capsule'
     }
   })
 }
