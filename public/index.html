@@ -135,7 +135,7 @@
             document.getElementById('submitBtn').textContent = '封存中...'
             
             try {
-                const res = await fetch('/api/submit', {
+                const res = await fetch('/api/test-123', {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
                     body: JSON.stringify({
