@@ -1,0 +1,12 @@
+name = "time-capsule"
+type = "webpack"
+
+[build]
+  command = "npm run build"
+  directory = "out"
+
+[build.upload]
+  format = "pages"
+
+[build.upload.pages_build_output]
+  format = "directory"
