@@ -11,10 +11,10 @@
             --sjtu-red: #9e0023; /* 交大红 */
         }
 
-        *{margin:0;padding:0;box-sizing:border-box}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,42 +24,50 @@
             overflow-x: hidden;
         }
 
-        /* 背景层：高斯模糊处理你提供的包图照片 */
+        /* 背景层：使用你提供的包图照片，并进行高斯模糊 */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: url('https://v2.567899.xyz/file/06611ec44f83d61074a248b1d4056639.jpg') no-repeat center center;
             background-size: cover;
-            filter: blur(20px) brightness(0.85); /* 20px 高斯模糊 */
-            transform: scale(1.1); /* 防止边缘发白 */
+            filter: blur(20px) brightness(0.8); /* 20px 高斯模糊，并稍微调暗以突出文字 */
+            transform: scale(1.1); /* 消除边缘发白 */
             z-index: -1;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
             padding: 40px 30px;
             border-radius: 24px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
             border: 1px solid rgba(255, 255, 255, 0.3);
             text-align: center;
+            animation: fadeIn 0.8s ease-out;
         }
 
-        h1 { color: var(--sjtu-red); margin-bottom: 8px; font-size: 26px; }
-        .subtitle { color: #666; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 校徽与标题 */
+        .logo { width: 60px; height: 60px; margin-bottom: 15px; }
+        h1 { color: var(--sjtu-red); font-size: 26px; margin-bottom: 8px; letter-spacing: 1px; }
+        .subtitle { color: #555; font-size: 14px; margin-bottom: 30px; line-height: 1.5; font-weight: 500; }
 
         input, textarea {
             width: 100%;
             padding: 14px;
-            border: 1.5px solid #eee;
-            border-radius: 10px;
+            border: 1.5px solid #ddd;
+            border-radius: 12px;
             margin-bottom: 15px;
             font-size: 15px;
-            transition: all 0.3s;
-            background: #fdfdfd;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         input:focus, textarea:focus {
             outline: none;
@@ -68,77 +76,91 @@
             box-shadow: 0 0 0 4px rgba(158, 0, 35, 0.1);
         }
 
-        /* 录音按钮美化 */
+        /* 录音区域美化 */
         .record-btn {
             width: 100%;
-            height: 110px;
+            height: 120px;
+            background: #fff;
             border: 2px dashed #ccc;
-            border-radius: 15px;
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-            background: white;
+            margin-bottom: 20px;
+            transition: all 0.4s ease;
+            position: relative;
         }
         .record-btn:hover { border-color: var(--sjtu-red); background: #fffcfc; }
         
-        /* 录音时的呼吸灯动画 */
         .record-btn.recording {
             border-color: var(--sjtu-red);
             background: #fff5f5;
-            animation: pulse 1.5s infinite;
+            border-style: solid;
+            animation: recording-pulse 1.5s infinite;
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(158, 0, 35, 0.2); }
-            70% { box-shadow: 0 0 0 10px rgba(158, 0, 35, 0); }
+
+        @keyframes recording-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(158, 0, 35, 0.3); }
+            70% { box-shadow: 0 0 0 12px rgba(158, 0, 35, 0); }
             100% { box-shadow: 0 0 0 0 rgba(158, 0, 35, 0); }
         }
 
-        #recordIcon { font-size: 30px; margin-bottom: 5px; }
-        .timer { font-size: 22px; font-weight: bold; color: var(--sjtu-red); font-family: monospace; }
+        #recordIcon { font-size: 32px; margin-bottom: 8px; transition: transform 0.3s; }
+        .recording #recordIcon { transform: scale(1.2); }
+        #recordText { font-weight: 600; color: #666; }
+        .timer { font-size: 20px; font-weight: bold; color: var(--sjtu-red); font-family: 'Courier New', Courier, monospace; margin-top: 5px; }
 
+        /* 音频播放器 */
+        audio { width: 100%; margin-bottom: 20px; height: 35px; border-radius: 8px; display: none; }
+
+        /* 提交按钮 */
         button#submitBtn {
             width: 100%;
             padding: 16px;
             background: var(--sjtu-red);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 10px 20px rgba(158, 0, 35, 0.15);
+            box-shadow: 0 8px 15px rgba(158, 0, 35, 0.2);
         }
-        button#submitBtn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
-        button#submitBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        button#submitBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 20px rgba(158, 0, 35, 0.3);
+        }
+        button#submitBtn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        .status { margin-top: 15px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
-        .status.show { display: block; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        .info { background: #d1ecf1; color: #0c5460; }
-        audio { width: 100%; margin-bottom: 15px; display: none; height: 35px; }
+        /* 状态消息 */
+        .status { margin-top: 20px; padding: 12px; border-radius: 10px; display: none; font-size: 14px; text-align: center; }
+        .status.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>🎓 时光胶囊</h1>
-        <p class="subtitle">致 130 周年校庆的自己<br>录制 30s 语音，130 天后自动送达</p>
+        <img class="logo" src="https://www.sjtu.edu.cn/resource/assets/img/logo.png" alt="SJTU Logo">
+        <h1>时光胶囊</h1>
+        <p class="subtitle">致 130 周年校庆的自己<br>录制 30s 语音，130 天后自动开启</p>
         
-        <input type="email" id="email" placeholder="your@email.com (接收地址)" required>
+        <input type="email" id="email" placeholder="接收胶囊的邮箱地址" required>
         
         <div class="record-btn" id="recordBtn" onclick="toggleRecord()">
             <div id="recordIcon">🎙️</div>
-            <div id="recordText">点击开始录音</div>
+            <div id="recordText">点击开始录制</div>
             <div class="timer" id="timer" style="display:none">00:00</div>
         </div>
         
         <audio id="preview" controls></audio>
-        <textarea id="message" rows="2" placeholder="给未来的自己写句话..."></textarea>
+        <textarea id="message" rows="2" placeholder="写下一句你想对未来自己说的话..."></textarea>
         
         <button id="submitBtn" onclick="submit()" disabled>封存这份时光</button>
         <div class="status" id="status"></div>
@@ -158,11 +180,11 @@
                         blob = new Blob(chunks, {type:'audio/webm'});
                         document.getElementById('preview').src = URL.createObjectURL(blob);
                         document.getElementById('preview').style.display = 'block';
-                        showStatus('正在上传...', 'info');
+                        showStatus('正在上传胶囊...', 'info');
                         await uploadAudio();
-                    }
+                    };
                 } catch(err) {
-                    alert('请允许麦克风权限');
+                    alert('请允许麦克风访问权限');
                     return;
                 }
             }
@@ -172,11 +194,13 @@
                 recorder.start();
                 recording = true;
                 seconds = 0;
+                // UI 变化
                 document.getElementById('recordBtn').classList.add('recording');
                 document.getElementById('recordIcon').textContent = '⏹️';
                 document.getElementById('recordText').textContent = '点击停止';
                 document.getElementById('timer').style.display = 'block';
-                document.title = "🔴 正在录音..."; // 动态修改标题
+                // 网页标题反馈
+                document.title = "🔴 正在录音 - 时光胶囊";
                 
                 timer = setInterval(() => {
                     seconds++;
@@ -189,11 +213,12 @@
                 clearInterval(timer);
                 recorder.stop();
                 recording = false;
+                // 恢复 UI
                 document.getElementById('recordBtn').classList.remove('recording');
                 document.getElementById('recordIcon').textContent = '🎙️';
                 document.getElementById('recordText').textContent = '重新录制';
                 document.getElementById('timer').style.display = 'none';
-                document.title = originalTitle; // 恢复标题
+                document.title = originalTitle;
             }
         }
 
@@ -208,14 +233,14 @@
                 if (data.secure_url) {
                     voiceUrl = data.secure_url;
                     document.getElementById('submitBtn').disabled = false;
-                    showStatus('✅ 胶囊已准备就绪', 'success');
+                    showStatus('✅ 语音已就绪，可以封存了', 'success');
                 }
-            } catch(e) { showStatus('上传失败，请刷新重试', 'error'); }
+            } catch(e) { showStatus('上传遇到点小麻烦，请重试', 'error'); }
         }
 
         async function submit() {
             const email = document.getElementById('email').value.trim();
-            if (!email || !email.includes('@')) return showStatus('请输入有效邮箱', 'error');
+            if(!email.includes('@')) return showStatus('请填写正确的邮箱', 'error');
             
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('submitBtn').textContent = '正在封存...';
@@ -224,21 +249,21 @@
                 const res = await fetch('/api/submit', {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({
-                        email,
-                        voice_url: voiceUrl,
-                        message: document.getElementById('message').value
+                    body: JSON.stringify({ 
+                        email, 
+                        voice_url: voiceUrl, 
+                        message: document.getElementById('message').value 
                     })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showStatus(`🎉 封存成功！<br>将在 <b>${data.send_date}</b> 送达`, 'success');
-                    setTimeout(() => location.reload(), 4000);
+                    showStatus(`🎉 封存成功！<br>将在 <b>${data.send_date}</b> 发送到你的邮箱`, 'success');
+                    setTimeout(() => location.reload(), 5000);
                 }
             } catch(e) {
-                showStatus('提交失败', 'error');
+                showStatus('提交失败：' + e.message, 'error');
                 document.getElementById('submitBtn').disabled = false;
-                document.getElementById('submitBtn').textContent = '封存胶囊';
+                document.getElementById('submitBtn').textContent = '封存这份时光';
             }
         }
 
