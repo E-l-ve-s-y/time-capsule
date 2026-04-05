@@ -4,61 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>时光胶囊 · 交大130周年</title>
+    <link rel="icon" href="https://www.sjtu.edu.cn/resource/assets/img/logo.png" type="image/png">
+    
     <style>
         :root {
             --sjtu-red: #9e0023; /* 交大红 */
-            --sjtu-gold: #c2a15f; /* 交大金 */
-            --bg-gradient: linear-gradient(135deg, #8e0e00 0%, #1f1c18 100%);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+        *{margin:0;padding:0;box-sizing:border-box}
+        
         body {
-            font-family: -apple-system, "Helvetica Neue", sans-serif;
-            background: var(--bg-gradient);
+            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景层：高斯模糊处理你提供的包图照片 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://v2.567899.xyz/file/06611ec44f83d61074a248b1d4056639.jpg') no-repeat center center;
+            background-size: cover;
+            filter: blur(20px) brightness(0.85); /* 20px 高斯模糊 */
+            transform: scale(1.1); /* 防止边缘发白 */
+            z-index: -1;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
             padding: 40px 30px;
             border-radius: 24px;
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
         }
 
-        /* 标题美化 */
-        .header { text-align: center; margin-bottom: 30px; }
-        h1 { 
-            color: var(--sjtu-red); 
-            font-size: 28px; 
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        .subtitle { 
-            color: #666; 
-            font-size: 14px; 
-            line-height: 1.6;
-        }
+        h1 { color: var(--sjtu-red); margin-bottom: 8px; font-size: 26px; }
+        .subtitle { color: #666; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
 
-        /* 输入框优化 */
-        .input-group { margin-bottom: 20px; position: relative; }
         input, textarea {
             width: 100%;
-            padding: 14px 16px;
+            padding: 14px;
             border: 1.5px solid #eee;
-            border-radius: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             font-size: 15px;
-            background: #f9f9f9;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
+            background: #fdfdfd;
         }
         input:focus, textarea:focus {
             outline: none;
@@ -67,52 +68,38 @@
             box-shadow: 0 0 0 4px rgba(158, 0, 35, 0.1);
         }
 
-        /* 录音按钮炫酷化 */
+        /* 录音按钮美化 */
         .record-btn {
             width: 100%;
-            height: 120px;
-            background: #fff;
-            border: 2px dashed #ddd;
-            border-radius: 16px;
+            height: 110px;
+            border: 2px dashed #ccc;
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            background: white;
         }
         .record-btn:hover { border-color: var(--sjtu-red); background: #fffcfc; }
-    
-        /* 录音时的呼吸脉冲效果 */
+        
+        /* 录音时的呼吸灯动画 */
         .record-btn.recording {
             border-color: var(--sjtu-red);
             background: #fff5f5;
-            border-style: solid;
+            animation: pulse 1.5s infinite;
         }
-        .record-btn.recording::after {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            background: rgba(158, 0, 35, 0.05);
-            animation: pulse-bg 1.5s infinite;
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(158, 0, 35, 0.2); }
+            70% { box-shadow: 0 0 0 10px rgba(158, 0, 35, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(158, 0, 35, 0); }
         }
 
-        @keyframes pulse-bg {
-            0% { transform: scale(0.95); opacity: 1; }
-            100% { transform: scale(1.2); opacity: 0; }
-        }
+        #recordIcon { font-size: 30px; margin-bottom: 5px; }
+        .timer { font-size: 22px; font-weight: bold; color: var(--sjtu-red); font-family: monospace; }
 
-        #recordIcon { font-size: 32px; margin-bottom: 8px; z-index: 1; }
-        #recordText { font-weight: 600; color: #555; z-index: 1; }
-        .timer { font-size: 20px; color: var(--sjtu-red); font-family: monospace; z-index: 1; margin-top: 5px;}
-
-        /* 播放器微调 */
-        audio { width: 100%; margin-bottom: 20px; height: 36px; }
-
-        /* 提交按钮 */
         button#submitBtn {
             width: 100%;
             padding: 16px;
@@ -120,145 +107,118 @@
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 17px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 10px 20px rgba(158, 0, 35, 0.2);
+            box-shadow: 0 10px 20px rgba(158, 0, 35, 0.15);
         }
-        button#submitBtn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-            box-shadow: 0 12px 24px rgba(158, 0, 35, 0.3);
-        }
-        button#submitBtn:disabled { background: #ccc; box-shadow: none; }
+        button#submitBtn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+        button#submitBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-        /* 状态提示美化 */
-        .status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 500;
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .success { background: #e6f4ea; color: #1e7e34; border: 1px solid #c3e6cb; }
-        .error { background: #feefef; color: #d93025; border: 1px solid #f9d6d5; }
+        .status { margin-top: 15px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
+        .status.show { display: block; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        audio { width: 100%; margin-bottom: 15px; display: none; height: 35px; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="header">
-            <h1>🎙️ 时光胶囊</h1>
-            <p class="subtitle">致 130 周年校庆的自己<br>录制一段音频，130天后开启</p>
-        </div>
-
-        <div class="input-group">
-            <input type="email" id="email" placeholder="接收胶囊的邮箱地址" required>
-        </div>
-
+        <h1>🎓 时光胶囊</h1>
+        <p class="subtitle">致 130 周年校庆的自己<br>录制 30s 语音，130 天后自动送达</p>
+        
+        <input type="email" id="email" placeholder="your@email.com (接收地址)" required>
+        
         <div class="record-btn" id="recordBtn" onclick="toggleRecord()">
             <div id="recordIcon">🎙️</div>
-            <div id="recordText">开始录制语音</div>
+            <div id="recordText">点击开始录音</div>
             <div class="timer" id="timer" style="display:none">00:00</div>
         </div>
-
-        <audio id="preview" controls style="display:none"></audio>
-    
-        <div class="input-group">
-            <textarea id="message" rows="3" placeholder="写下一句你想说的话..."></textarea>
-        </div>
-    
+        
+        <audio id="preview" controls></audio>
+        <textarea id="message" rows="2" placeholder="给未来的自己写句话..."></textarea>
+        
         <button id="submitBtn" onclick="submit()" disabled>封存这份时光</button>
-    
         <div class="status" id="status"></div>
     </div>
 
     <script>
-        const API = location.origin.includes('localhost') ? '' : ''
-        
-        let recorder, chunks = [], blob, voiceUrl, recording = false, timer, seconds = 0
+        let recorder, chunks = [], blob, voiceUrl, recording = false, timer, seconds = 0;
+        const originalTitle = document.title;
 
         async function toggleRecord() {
             if (!recorder) {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({audio:true})
-                    recorder = new MediaRecorder(stream)
-                    recorder.ondataavailable = e => chunks.push(e.data)
+                    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+                    recorder = new MediaRecorder(stream);
+                    recorder.ondataavailable = e => chunks.push(e.data);
                     recorder.onstop = async () => {
-                        blob = new Blob(chunks, {type:'audio/webm'})
-                        document.getElementById('preview').src = URL.createObjectURL(blob)
-                        document.getElementById('preview').style.display = 'block'
-                        showStatus('正在上传...', 'info')
-                        await uploadAudio()
+                        blob = new Blob(chunks, {type:'audio/webm'});
+                        document.getElementById('preview').src = URL.createObjectURL(blob);
+                        document.getElementById('preview').style.display = 'block';
+                        showStatus('正在上传...', 'info');
+                        await uploadAudio();
                     }
                 } catch(err) {
-                    alert('请允许麦克风权限')
-                    return
+                    alert('请允许麦克风权限');
+                    return;
                 }
             }
             
             if (!recording) {
-                chunks = []
-                recorder.start()
-                recording = true
-                seconds = 0
-                document.getElementById('recordBtn').classList.add('recording')
-                document.getElementById('recordIcon').textContent = '⏹️'
-                document.getElementById('recordText').textContent = '点击停止'
-                document.getElementById('timer').style.display = 'block'
+                chunks = [];
+                recorder.start();
+                recording = true;
+                seconds = 0;
+                document.getElementById('recordBtn').classList.add('recording');
+                document.getElementById('recordIcon').textContent = '⏹️';
+                document.getElementById('recordText').textContent = '点击停止';
+                document.getElementById('timer').style.display = 'block';
+                document.title = "🔴 正在录音..."; // 动态修改标题
                 
                 timer = setInterval(() => {
-                    seconds++
-                    const m = String(Math.floor(seconds/60)).padStart(2,'0')
-                    const s = String(seconds%60).padStart(2,'0')
-                    document.getElementById('timer').textContent = `${m}:${s}`
-                    if (seconds >= 30) toggleRecord()
-                }, 1000)
+                    seconds++;
+                    const m = String(Math.floor(seconds/60)).padStart(2,'0');
+                    const s = String(seconds%60).padStart(2,'0');
+                    document.getElementById('timer').textContent = `${m}:${s}`;
+                    if (seconds >= 30) toggleRecord();
+                }, 1000);
             } else {
-                clearInterval(timer)
-                recorder.stop()
-                recording = false
-                document.getElementById('recordBtn').classList.remove('recording')
-                document.getElementById('recordIcon').textContent = '🎙️'
-                document.getElementById('recordText').textContent = '重新录制'
-                document.getElementById('timer').style.display = 'none'
+                clearInterval(timer);
+                recorder.stop();
+                recording = false;
+                document.getElementById('recordBtn').classList.remove('recording');
+                document.getElementById('recordIcon').textContent = '🎙️';
+                document.getElementById('recordText').textContent = '重新录制';
+                document.getElementById('timer').style.display = 'none';
+                document.title = originalTitle; // 恢复标题
             }
         }
 
         async function uploadAudio() {
             try {
-                const {url, params} = await fetch('/api/upload-url').then(r => r.json())
-                
-                const form = new FormData()
-                Object.entries(params).forEach(([k,v]) => form.append(k,v))
-                form.append('file', blob)
-                
-                const res = await fetch(url, {method:'POST', body:form})
-                const data = await res.json()
-                
+                const {url, params} = await fetch('/api/upload-url').then(r => r.json());
+                const form = new FormData();
+                Object.entries(params).forEach(([k,v]) => form.append(k,v));
+                form.append('file', blob);
+                const res = await fetch(url, {method:'POST', body:form});
+                const data = await res.json();
                 if (data.secure_url) {
-                    voiceUrl = data.secure_url
-                    document.getElementById('submitBtn').disabled = false
-                    showStatus('✅ 上传成功，可以封存了', 'success')
-                } else {
-                    throw new Error('上传失败')
+                    voiceUrl = data.secure_url;
+                    document.getElementById('submitBtn').disabled = false;
+                    showStatus('✅ 胶囊已准备就绪', 'success');
                 }
-            } catch(e) {
-                showStatus('上传失败：' + e.message, 'error')
-            }
+            } catch(e) { showStatus('上传失败，请刷新重试', 'error'); }
         }
 
         async function submit() {
-            const email = document.getElementById('email').value.trim()
-            if (!email || !email.includes('@')) {
-                showStatus('请输入正确的邮箱', 'error')
-                return
-            }
+            const email = document.getElementById('email').value.trim();
+            if (!email || !email.includes('@')) return showStatus('请输入有效邮箱', 'error');
             
-            document.getElementById('submitBtn').disabled = true
-            document.getElementById('submitBtn').textContent = '封存中...'
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = '正在封存...';
             
             try {
                 const res = await fetch('/api/submit', {
@@ -269,26 +229,23 @@
                         voice_url: voiceUrl,
                         message: document.getElementById('message').value
                     })
-                })
-                
-                const data = await res.json()
+                });
+                const data = await res.json();
                 if (data.success) {
-                    showStatus(`🎉 封存成功！<br>将在 <b>${data.send_date}</b> 发送到你的邮箱`, 'success')
-                    setTimeout(() => location.reload(), 4000)
-                } else {
-                    throw new Error(data.error || '提交失败')
+                    showStatus(`🎉 封存成功！<br>将在 <b>${data.send_date}</b> 送达`, 'success');
+                    setTimeout(() => location.reload(), 4000);
                 }
             } catch(e) {
-                showStatus('失败：' + e.message, 'error')
-                document.getElementById('submitBtn').disabled = false
-                document.getElementById('submitBtn').textContent = '封存胶囊'
+                showStatus('提交失败', 'error');
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = '封存胶囊';
             }
         }
 
         function showStatus(msg, type) {
-            const s = document.getElementById('status')
-            s.innerHTML = msg
-            s.className = 'status show ' + type
+            const s = document.getElementById('status');
+            s.innerHTML = msg;
+            s.className = 'status show ' + type;
         }
     </script>
 </body>
